@@ -1,37 +1,54 @@
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from chatbot import chat_with_argus
 
-app = FastAPI()
+app = FastAPI(
+    title="A.R.G.U.S",
+    version="1.0.0"
+)
 
+# Serve static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
+# Request model
 class ChatRequest(BaseModel):
     message: str
 
 
-@app.get("/", response_class=HTMLResponse)
+# Home page
+@app.get("/")
 async def home():
-    with open("templates/index.html", "r", encoding="utf-8") as file:
-        return file.read()
+    return FileResponse("templates/index.html")
 
 
+# Chat endpoint
 @app.post("/chat")
 async def chat(request: ChatRequest):
+    try:
+        reply = await chat_with_argus(
+            user_message=request.message,
+            history=[]
+        )
 
-    reply = await chat_with_argus(
-        request.message,
-        history=[]
-    )
+        return {
+            "success": True,
+            "reply": reply
+        }
 
-    return {
-        "reply": reply
-    }
+    except Exception as e:
+        print(f"[ERROR] {e}")
 
+        return {
+            "success": False,
+            "reply": "Sorry, something went wrong while contacting Argus."
+        }
+
+
+# Health check
 @app.get("/health")
 async def health():
     return {
@@ -40,11 +57,7 @@ async def health():
     }
 
 
-# Import API routes later
-# from routes.chat import router as chat_router
-# app.include_router(chat_router)
-
-
+# Run locally
 if __name__ == "__main__":
     import uvicorn
 
