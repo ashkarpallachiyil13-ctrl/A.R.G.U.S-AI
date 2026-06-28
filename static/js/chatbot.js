@@ -17,21 +17,7 @@ document.addEventListener("click", () => {
     dropdown.classList.remove("open");
 });
 
-// ===========================
-// Chat Functions
-// ===========================
-
-function addMessage(text, sender) {
-
-    const row = document.createElement("div");
-    row.className = `msg-row ${sender}`;
-
-    const bubble = document.createElement("div");
-    bubble.className = "bubble";
-    bubble.textContent = text;
-
-    row.appendChild(bubble);
-    chatArea.appendChild(row);
+chatArea.appendChild(row);
 
     chatArea.scrollTop = chatArea.scrollHeight;
 }
