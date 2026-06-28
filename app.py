@@ -10,18 +10,33 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Serve static files
+# ==========================
+# Static Files
+# ==========================
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+
+# ==========================
+# Request Model
+# ==========================
 
 class ChatRequest(BaseModel):
     message: str
 
 
+# ==========================
+# Home
+# ==========================
+
 @app.get("/")
 async def home():
     return FileResponse("templates/index.html")
 
+
+# ==========================
+# Chat Endpoint (Streaming)
+# ==========================
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
@@ -33,18 +48,28 @@ async def chat(request: ChatRequest):
                 user_message=request.message,
                 history=[]
             ),
-            media_type="text/plain"
+            media_type="text/plain; charset=utf-8",
+            headers={
+                "Cache-Control": "no-cache",
+                "X-Accel-Buffering": "no"
+            }
         )
 
     except Exception as e:
 
         print(f"[ERROR] {e}")
 
-        return {
-            "success": False,
-            "reply": "Sorry, something went wrong while contacting Argus."
-        }
+        return StreamingResponse(
+            iter([
+                "Sorry, something went wrong while contacting Argus."
+            ]),
+            media_type="text/plain; charset=utf-8"
+        )
 
+
+# ==========================
+# Health Check
+# ==========================
 
 @app.get("/health")
 async def health():
@@ -53,6 +78,10 @@ async def health():
         "message": "Argus is running!"
     }
 
+
+# ==========================
+# Local Development
+# ==========================
 
 if __name__ == "__main__":
     import uvicorn
