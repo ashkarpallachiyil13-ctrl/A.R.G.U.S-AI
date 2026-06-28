@@ -1,1 +1,80 @@
-a
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A.R.G.U.S</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <div class="topbar">
+        <div class="brand">A.R.G.U.S</div>
+
+        <div class="menu-wrap">
+
+            <button class="menu-btn" id="menuBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="dropdown" id="dropdown">
+                <button>Settings</button>
+                <button>Clear Chat</button>
+                <button>About A.R.G.U.S</button>
+                <button>Log Out</button>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="chat-area" id="chatArea">
+
+        <div class="system-line">
+            SESSION INITIATED
+        </div>
+
+        <div class="msg-row bot">
+            <div class="bubble">
+                Hello. A.R.G.U.S is online. How can I help you?
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="input-bar">
+
+        <input
+            id="msgInput"
+            type="text"
+            placeholder="Type a message..."
+        >
+
+        <button class="send-btn" id="sendBtn">
+
+            <svg viewBox="0 0 24 24">
+                <path
+                    d="M3 11.5L21 3L13.5 21L11 13L3 11.5Z"
+                    fill="currentColor"/>
+            </svg>
+
+        </button>
+
+    </div>
+
+</div>
+
+<script src="/static/js/chatbot.js"></script>
+
+</body>
+</html>
