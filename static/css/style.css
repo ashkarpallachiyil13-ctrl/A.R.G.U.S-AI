@@ -1,5 +1,4 @@
-<style>  
-  :root{  
+:root{  
     --bg: #000000;  
     --panel: #0a0d10;  
     --blue: #7fd4f0;  
@@ -212,4 +211,3 @@ transform: scale(1.05);
 }
 .send-btn:active{ transform: scale(0.95); }
 .send-btn svg{ width:18px; height:18px; }
-</style>
