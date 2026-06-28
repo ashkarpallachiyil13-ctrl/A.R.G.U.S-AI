@@ -17,13 +17,43 @@ document.addEventListener("click", () => {
     dropdown.classList.remove("open");
 });
 
-chatArea.appendChild(row);
+// ===========================
+// Chat Functions
+// ===========================
+
+function addMessage(text, sender) {
+
+    const row = document.createElement("div");
+    row.className = `msg-row ${sender}`;
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.textContent = text;
+
+    row.appendChild(bubble);
+    chatArea.appendChild(row);
 
     chatArea.scrollTop = chatArea.scrollHeight;
 }
 
+function createBotMessage() {
+
+    const row = document.createElement("div");
+    row.className = "msg-row bot";
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+
+    row.appendChild(bubble);
+    chatArea.appendChild(row);
+
+    chatArea.scrollTop = chatArea.scrollHeight;
+
+    return bubble;
+}
+
 // ===========================
-// Send Message
+// Send Message (Streaming)
 // ===========================
 
 async function handleSend() {
@@ -35,6 +65,11 @@ async function handleSend() {
     addMessage(text, "user");
 
     msgInput.value = "";
+
+    msgInput.disabled = true;
+    sendBtn.disabled = true;
+
+    const botBubble = createBotMessage();
 
     try {
 
@@ -52,20 +87,45 @@ async function handleSend() {
 
         });
 
-        const data = await response.json();
+        if (!response.ok) {
+            throw new Error("Server error.");
+        }
 
-        addMessage(data.reply, "bot");
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+
+            const { done, value } = await reader.read();
+
+            if (done) break;
+
+            const chunk = decoder.decode(value, {
+                stream: true
+            });
+
+            botBubble.textContent += chunk;
+
+            chatArea.scrollTop = chatArea.scrollHeight;
+
+        }
 
     }
 
     catch (error) {
 
-        addMessage(
-            "Connection error.",
-            "bot"
-        );
+        botBubble.textContent = "Connection error.";
 
         console.error(error);
+
+    }
+
+    finally {
+
+        msgInput.disabled = false;
+        sendBtn.disabled = false;
+
+        msgInput.focus();
 
     }
 
