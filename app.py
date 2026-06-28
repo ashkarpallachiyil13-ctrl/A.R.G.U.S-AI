@@ -29,7 +29,7 @@ async def home():
 @app.post("/chat")
 async def chat(request: ChatRequest):
     try:
-        reply = await chat_with_argus(
+        reply = chat_with_argus(
             user_message=request.message,
             history=[]
         )
