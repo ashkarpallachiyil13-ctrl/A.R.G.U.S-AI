@@ -1,15 +1,17 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
-app = FastAPI(
-    title="Argus",
-    description="AI Assistant",
-    version="1.0.0"
-)
+from chatbot import chat_with_argus
 
-# Serve static files
+app = FastAPI()
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+class ChatRequest(BaseModel):
+    message: str
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -17,6 +19,18 @@ async def home():
     with open("templates/index.html", "r", encoding="utf-8") as file:
         return file.read()
 
+
+@app.post("/chat")
+async def chat(request: ChatRequest):
+
+    reply = await chat_with_argus(
+        request.message,
+        history=[]
+    )
+
+    return {
+        "reply": reply
+    }
 
 @app.get("/health")
 async def health():
