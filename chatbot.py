@@ -1,4 +1,4 @@
-qimport os
+import os
 import traceback
 from openai import OpenAI
 
@@ -22,7 +22,7 @@ Rules:
 - Be helpful.
 - Be accurate.
 - Be concise.
-- If you don't know something, admit it.
+- If you don't know something, say so.
 - Do not make up facts.
 """
 
@@ -35,9 +35,8 @@ client = OpenAI(
     api_key=API_KEY
 )
 
-
 # ==========================
-# Chat Function
+# Streaming Chat Function
 # ==========================
 
 def stream_chat_with_argus(user_message: str, history: list = None):
@@ -57,10 +56,12 @@ def stream_chat_with_argus(user_message: str, history: list = None):
 
     messages.extend(history)
 
-    messages.append({
-        "role": "user",
-        "content": user_message
-    })
+    messages.append(
+        {
+            "role": "user",
+            "content": user_message
+        }
+    )
 
     try:
 
@@ -82,33 +83,16 @@ def stream_chat_with_argus(user_message: str, history: list = None):
 
             delta = chunk.choices[0].delta
 
-            if delta and delta.content:
-                yield delta.content
+            if delta is None:
+                continue
+
+            content = getattr(delta, "content", None)
+
+            if content:
+                yield content
 
     except Exception:
+
         traceback.print_exc()
-        yield "\n\n[Error while generating response]"
-    })
 
-    try:
-
-        response = client.chat.completions.create(
-            model=MODEL,
-            messages=messages,
-            extra_body={
-                "reasoning": {
-                    "enabled": True
-                }
-            }
-        )
-
-        reply = response.choices[0].message.content
-
-        if not reply:
-            return "I couldn't generate a response."
-
-        return reply
-
-    except Exception:
-        traceback.print_exc()
-        return "Sorry, I encountered an error while generating a response."
+        yield "Sorry, I encountered an error while generating a response."
