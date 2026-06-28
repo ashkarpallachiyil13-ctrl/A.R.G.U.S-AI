@@ -1,4 +1,4 @@
-import os
+qimport os
 import traceback
 from openai import OpenAI
 
@@ -40,16 +40,9 @@ client = OpenAI(
 # Chat Function
 # ==========================
 
-def chat_with_argus(user_message: str, history: list = None) -> str:
+def stream_chat_with_argus(user_message: str, history: list = None):
     """
-    Sends a message to OpenRouter and returns the AI response.
-
-    Args:
-        user_message: Latest user message.
-        history: Previous messages in OpenAI format.
-
-    Returns:
-        Assistant reply.
+    Streams the AI response token-by-token.
     """
 
     if history is None:
@@ -67,6 +60,34 @@ def chat_with_argus(user_message: str, history: list = None) -> str:
     messages.append({
         "role": "user",
         "content": user_message
+    })
+
+    try:
+
+        stream = client.chat.completions.create(
+            model=MODEL,
+            messages=messages,
+            stream=True,
+            extra_body={
+                "reasoning": {
+                    "enabled": True
+                }
+            }
+        )
+
+        for chunk in stream:
+
+            if not chunk.choices:
+                continue
+
+            delta = chunk.choices[0].delta
+
+            if delta and delta.content:
+                yield delta.content
+
+    except Exception:
+        traceback.print_exc()
+        yield "\n\n[Error while generating response]"
     })
 
     try:
