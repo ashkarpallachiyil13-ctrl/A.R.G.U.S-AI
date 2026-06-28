@@ -1,9 +1,9 @@
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from chatbot import chat_with_argus
+from chatbot import stream_chat_with_argus
 
 app = FastAPI(
     title="A.R.G.U.S",
@@ -14,32 +14,30 @@ app = FastAPI(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-# Request model
 class ChatRequest(BaseModel):
     message: str
 
 
-# Home page
 @app.get("/")
 async def home():
     return FileResponse("templates/index.html")
 
 
-# Chat endpoint
 @app.post("/chat")
 async def chat(request: ChatRequest):
+
     try:
-        reply = chat_with_argus(
-            user_message=request.message,
-            history=[]
+
+        return StreamingResponse(
+            stream_chat_with_argus(
+                user_message=request.message,
+                history=[]
+            ),
+            media_type="text/plain"
         )
 
-        return {
-            "success": True,
-            "reply": reply
-        }
-
     except Exception as e:
+
         print(f"[ERROR] {e}")
 
         return {
@@ -48,7 +46,6 @@ async def chat(request: ChatRequest):
         }
 
 
-# Health check
 @app.get("/health")
 async def health():
     return {
@@ -57,7 +54,6 @@ async def health():
     }
 
 
-# Run locally
 if __name__ == "__main__":
     import uvicorn
 
